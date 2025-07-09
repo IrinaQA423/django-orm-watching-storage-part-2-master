@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.timezone import localtime
-from datetime import datetime
-from datacenter.duration_helpers import format_duration 
+from datacenter.duration_helpers import format_duration, get_duration
 
 
 class Passcard(models.Model):
@@ -33,23 +32,10 @@ class Visit(models.Model):
         )
 
 
-def get_duration(visit):
-    
-    if not visit.entered_at.tzinfo:
-        
-        from django.utils.timezone import get_current_timezone
-        entered_at = visit.entered_at.replace(tzinfo=get_current_timezone())
-    else:
-        entered_at = visit.entered_at
-
-    current_time = datetime.now()
-    return current_time - entered_at
-
-
 def get_long_visits(owner_name=None, min_duration=60):
-    
+
     visits = Visit.objects.all()
-    
+
     if owner_name:
         visits = visits.filter(passcard__owner_name=owner_name)
 
@@ -59,11 +45,11 @@ def get_long_visits(owner_name=None, min_duration=60):
         duration_minutes = duration.total_seconds() / 60
 
         if duration_minutes > min_duration:
-            formatted_duration = format_duration(duration)
+            
             visit_info = {
                 'owner_name': visit.passcard.owner_name,
                 'entered_at': localtime(visit.entered_at).strftime('%Y-%m-%d %H:%M:%S'),
-                'duration': formatted_duration,
+                'duration': format_duration(duration),
                 'leaved_at': localtime(visit.leaved_at).strftime('%Y-%m-%d %H:%M:%S') if visit.leaved_at else 'еще в хранилище'
             }
             long_visits.append(visit_info)
