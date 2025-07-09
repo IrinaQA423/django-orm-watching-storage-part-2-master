@@ -46,18 +46,12 @@ def get_duration(visit):
     return current_time - entered_at
 
 
-def get_visits_by_owner_name(owner_name):
-    
-    visits = Visit.objects.filter(passcard__owner_name=owner_name)
-
-    visits = visits.order_by('-entered_at')
-
-    return visits
-
-
-def get_long_visits(min_duration=60):
+def get_long_visits(owner_name=None, min_duration=60):
     
     visits = Visit.objects.all()
+    
+    if owner_name:
+        visits = visits.filter(passcard__owner_name=owner_name)
 
     long_visits = []
     for visit in visits:
@@ -68,27 +62,6 @@ def get_long_visits(min_duration=60):
             formatted_duration = format_duration(duration)
             visit_info = {
                 'owner_name': visit.passcard.owner_name,
-                'entered_at': localtime(visit.entered_at).strftime('%Y-%m-%d %H:%M:%S'),
-                'duration': formatted_duration,
-                'leaved_at': localtime(visit.leaved_at).strftime('%Y-%m-%d %H:%M:%S') if visit.leaved_at else 'still inside'
-            }
-            long_visits.append(visit_info)
-
-    return long_visits
-
-
-def get_long_visits_by_owner(owner_name, min_duration=60):
-    
-    visits = Visit.objects.filter(passcard__owner_name=owner_name)
-
-    long_visits = []
-    for visit in visits:
-        duration = get_duration(visit)
-        duration_minutes = duration.total_seconds() / 60
-
-        if duration_minutes > min_duration:
-            formatted_duration = format_duration(duration)
-            visit_info = {
                 'entered_at': localtime(visit.entered_at).strftime('%Y-%m-%d %H:%M:%S'),
                 'duration': formatted_duration,
                 'leaved_at': localtime(visit.leaved_at).strftime('%Y-%m-%d %H:%M:%S') if visit.leaved_at else 'еще в хранилище'
