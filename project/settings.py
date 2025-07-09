@@ -5,7 +5,6 @@ from environs import env
 env.read_env()
 
 DEBUG = env.bool("DEBUG", default=False)
-print({'ON' if DEBUG else "OFF"})
 
 db_engine = env("DB_ENGINE")
 db_host = env("DB_HOST")
