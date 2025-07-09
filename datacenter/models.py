@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import localtime
 from datetime import datetime
+from datacenter.duration_helpers import format_duration 
 
 
 class Passcard(models.Model):
@@ -43,15 +44,6 @@ def get_duration(visit):
 
     current_time = datetime.now()
     return current_time - entered_at
-
-
-def format_duration(duration):
-    seconds = duration.total_seconds()
-
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    seconds = int(seconds % 60)
-    return f"{hours}:{minutes:02d}:{seconds:02d}"
 
 
 def get_visits_by_owner_name(owner_name):
