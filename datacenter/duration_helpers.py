@@ -35,6 +35,4 @@ def get_duration(visit):
 
 def is_visit_strange(duration):
 
-    if not duration:
-        return False
-    return duration.total_seconds() > STRANGE_VISIT_THRESHOLD
+    return duration and duration.total_seconds() > STRANGE_VISIT_THRESHOLD
