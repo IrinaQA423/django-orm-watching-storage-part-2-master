@@ -1,11 +1,14 @@
-from django.utils.timezone import localtime, now
+from django.utils.timezone import localtime, now, get_current_timezone
 
 SECONDS_IN_ONE_HOUR = 3600
 SECONDS_IN_ONE_MINUTE = 60
 STRANGE_VISIT_THRESHOLD = SECONDS_IN_ONE_HOUR
 
+
 def format_duration(duration):
-    seconds = duration.total_seconds()
+    if duration is None:
+        return "Не завершен"
+    seconds = int(duration.total_seconds())
 
     hours = int(seconds // SECONDS_IN_ONE_HOUR)
     minutes = int((seconds % SECONDS_IN_ONE_HOUR) // SECONDS_IN_ONE_MINUTE)
@@ -13,24 +16,22 @@ def format_duration(duration):
     return f"{hours}:{minutes:02d}:{seconds:02d}"
 
 
-def get_visit_duration(visit):
-
-    if not visit.leaved_at:
-        return None
-    return localtime(visit.leaved_at) - localtime(visit.entered_at)
-
-
 def get_duration(visit):
+    # Проверяем, что входное время имеет временную зону
+    if not visit.entered_at:
+        return None  # Если entered_at отсутствует, возвращаем None
 
     if not visit.entered_at.tzinfo:
-
-        from django.utils.timezone import get_current_timezone
         entered_at = visit.entered_at.replace(tzinfo=get_current_timezone())
     else:
         entered_at = visit.entered_at
 
-    current_time = now()
-    return current_time - entered_at
+    # Используем leaved_at если доступно, иначе текущее время
+    leaved_at = visit.leaved_at if visit.leaved_at else now()
+    if not leaved_at.tzinfo:
+        leaved_at = leaved_at.replace(tzinfo=get_current_timezone())
+    
+    return leaved_at - entered_at
 
 
 def is_visit_strange(duration):
