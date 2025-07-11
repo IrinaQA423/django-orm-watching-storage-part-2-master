@@ -33,26 +33,3 @@ class Visit(models.Model):
         )
 
 
-def get_long_visits(owner_name=None, min_duration=MIN_DURATION):
-    visits = Visit.objects.all()
-
-    if owner_name:
-        visits = visits.filter(passcard__owner_name=owner_name)
-
-    long_visits = []
-    for visit in visits:
-        duration = get_duration(visit)
-        
-        if duration:  
-            duration_minutes = duration.total_seconds() / MIN_DURATION
-
-            if duration_minutes > min_duration:
-                visit_info = {
-                    'owner_name': visit.passcard.owner_name,
-                    'entered_at': localtime(visit.entered_at).strftime('%Y-%m-%d %H:%M:%S'),
-                    'duration': format_duration(duration),
-                    'leaved_at': localtime(visit.leaved_at).strftime('%Y-%m-%d %H:%M:%S') if visit.leaved_at else 'еще в хранилище'
-                }
-                long_visits.append(visit_info)
-
-    return long_visits
