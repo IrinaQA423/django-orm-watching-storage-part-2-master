@@ -6,9 +6,10 @@ STRANGE_VISIT_THRESHOLD = SECONDS_IN_ONE_HOUR
 
 
 def format_duration(duration):
-    if duration is None:
+    try:
+        seconds = int(duration.total_seconds())
+    except AttributeError:  
         return "Не завершен"
-    seconds = int(duration.total_seconds())
 
     hours = int(seconds // SECONDS_IN_ONE_HOUR)
     minutes = int((seconds % SECONDS_IN_ONE_HOUR) // SECONDS_IN_ONE_MINUTE)
@@ -17,16 +18,15 @@ def format_duration(duration):
 
 
 def get_duration(visit):
-    # Проверяем, что входное время имеет временную зону
+    
     if not visit.entered_at:
-        return None  # Если entered_at отсутствует, возвращаем None
+        return None  
 
     if not visit.entered_at.tzinfo:
         entered_at = visit.entered_at.replace(tzinfo=get_current_timezone())
     else:
         entered_at = visit.entered_at
 
-    # Используем leaved_at если доступно, иначе текущее время
     leaved_at = visit.leaved_at if visit.leaved_at else now()
     if not leaved_at.tzinfo:
         leaved_at = leaved_at.replace(tzinfo=get_current_timezone())
